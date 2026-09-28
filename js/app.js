@@ -17,7 +17,11 @@ const foodList = document.querySelector("#food-list");
 const otherPlans = document.querySelector("#other-plans");
 const activityJoke = document.querySelector("#activity-joke");
 const setActivity = document.querySelector("#set-activity");
+const yesTitle = document.querySelector("#yes-title");
+const yesPlan = document.querySelector("#yes-plan");
+const yesFoods = document.querySelector("#yes-foods");
 const yesHint = document.querySelector("#yes-hint");
+const copyPlan = document.querySelector("#copy-plan");
 const heartBit = document.querySelector(".heart-bit");
 const lateBit = document.querySelector(".late-bit");
 const heartLine = document.querySelector(".heart-line");
@@ -53,6 +57,14 @@ let frame = 0;
 let last = 0;
 
 const BEATS = [72, 74, 88, 120, 180, 240, "lol"];
+let lateTimer = 0;
+
+function show(scene) {
+  scene.hidden = false;
+  scene.classList.remove("enter");
+  void scene.offsetWidth;
+  scene.classList.add("enter");
+}
 
 function playHeart() {
   const length = heartLine.getTotalLength();
@@ -79,20 +91,26 @@ function playHeart() {
 }
 
 function showLate() {
+  window.clearTimeout(lateTimer);
+  lateTimer = 0;
   heartBit.hidden = true;
   lateBit.hidden = false;
 }
 
 yesBtn.addEventListener("click", () => {
   askScene.hidden = true;
-  shockScene.hidden = false;
-  shockScene.classList.add("is-in");
+  show(shockScene);
   playHeart();
   if (reduceMotion.matches) {
     showLate();
     return;
   }
-  setTimeout(showLate, 2300);
+  lateTimer = window.setTimeout(showLate, 2300);
+});
+
+shockScene.addEventListener("click", () => {
+  if (!lateBit.hidden) return;
+  showLate();
 });
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -112,8 +130,8 @@ const PLANS = [
   ["Pottery or painting", "We make something questionable and call it art"],
   ["Mini golf", "It's not competitive. Until it is"],
   ["Walk in the park", "Fresh air and suspiciously good conversation"],
-  ["Fight (boxing gloves provided)", "A romantic evening, apparently"],
   ["Escape room", "Let's find out how well we panic together"],
+  ["Fight (boxing gloves provided)", "A romantic evening, apparently"],
   ["Try something neither of us has done", "Low expectations. High potential for a story"],
 ];
 
@@ -132,9 +150,12 @@ const MAX_WEEK = 4;
 
 let selectedDay = "";
 let selectedTime = "";
+let selectedTimeJoke = "";
 let selectedPlan = "";
-let selectedFood = "";
+let selectedPlanJoke = "";
+const selectedFoods = new Set();
 let weekOffset = 0;
+let weekToken = 0;
 
 function atNoon(date) {
   const copy = new Date(date);
@@ -184,6 +205,7 @@ function renderWeek() {
     button.className = "day-chip";
     button.setAttribute("aria-label", label);
     button.setAttribute("aria-pressed", String(label === selectedDay));
+    if (date < tomorrow()) button.disabled = true;
     dayNum.className = "day-num";
     dayNum.textContent = String(date.getDate());
     month.className = "day-month";
@@ -212,6 +234,7 @@ function renderPlan() {
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => {
       selectedTime = hour;
+      selectedTimeJoke = joke;
       timeJoke.textContent = joke;
       pressChip(timeList, button);
       lockPlan.disabled = false;
@@ -224,10 +247,14 @@ let foodCardTimer = 0;
 let foodCardToken = 0;
 
 function clearFoodPick() {
-  selectedFood = "";
+  selectedFoods.clear();
   foodList.querySelectorAll("button").forEach((chip) => {
     chip.setAttribute("aria-pressed", "false");
   });
+}
+
+function selectedFoodLabel() {
+  return FOODS.filter((food) => selectedFoods.has(food)).join(", ");
 }
 
 function showFoodCard(foodButton) {
@@ -239,14 +266,17 @@ function showFoodCard(foodButton) {
   activityJoke.hidden = true;
   if (!foodCard.hidden && foodCard.style.opacity !== "0") return;
   foodCard.style.opacity = "0";
+  foodCard.style.transform = "translateY(4px)";
   foodCard.hidden = false;
   if (reduceMotion.matches) {
     foodCard.style.opacity = "1";
+    foodCard.style.transform = "";
     return;
   }
   requestAnimationFrame(() => {
     if (token !== foodCardToken) return;
     foodCard.style.opacity = "1";
+    foodCard.style.transform = "translateY(0)";
   });
 }
 
@@ -261,14 +291,43 @@ function hideFoodCard() {
   if (reduceMotion.matches) {
     foodCard.hidden = true;
     foodCard.style.opacity = "";
+    foodCard.style.transform = "";
     return;
   }
   foodCard.style.opacity = "0";
+  foodCard.style.transform = "translateY(4px)";
   foodCardTimer = window.setTimeout(() => {
     if (token !== foodCardToken) return;
     foodCard.hidden = true;
     foodCard.style.opacity = "";
+    foodCard.style.transform = "";
   }, 200);
+}
+
+const PLAN_ICONS = {
+  Food: "<path d=\"M6 4v7a2 2 0 0 0 4 0V4\"/><path d=\"M8 4v16\"/><path d=\"M16 4c2 3 2 5 0 7v9\"/>",
+  Bowling: "<circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"9.4\" cy=\"9.8\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"13.2\" cy=\"11.2\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.4\" cy=\"13.8\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/>",
+  "Pottery or painting": "<path d=\"M4 20h16\"/><path d=\"M8 20c.4-4 1.2-7 4-9 2.8 2 3.6 5 4 9\"/><path d=\"M14 5l5 2-5 2\"/><path d=\"M14 5c-2 1-3 3-2 5\"/>",
+  "Mini golf": "<path d=\"M8 20V5\"/><path d=\"M8 5h8l-2.2 3.2L16 11H8\"/><circle cx=\"16\" cy=\"17\" r=\"2\"/>",
+  "Walk in the park": "<path d=\"M12 21v-7\"/><path d=\"M12 14c-4 0-6-2.4-5-5.5C8.2 8.5 9.4 9.4 12 11c2.6-1.6 3.8-2.5 5-2.5 1 3.1-1 5.5-5 5.5z\"/>",
+  "Fight (boxing gloves provided)": "<path d=\"M8 11V8a1.8 1.8 0 0 1 3.6 0V11\"/><path d=\"M11.6 10.2V7.2a1.8 1.8 0 0 1 3.6 0v4.2\"/><path d=\"M15.2 9.4V8a1.8 1.8 0 0 1 3.5.4c.2 2.2.2 4.2-.2 6.2-1 3.2-3.4 5.4-7 5.4h-.8c-2.6 0-4.4-1.6-4.7-4.2L6 12.2A2 2 0 0 1 8 10.2\"/>",
+  "Escape room": "<path d=\"M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16\"/><path d=\"M4 21h16\"/><circle cx=\"15\" cy=\"12\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>",
+  "Try something neither of us has done": "<path d=\"M12 3v3\"/><path d=\"M12 18v3\"/><path d=\"M3 12h3\"/><path d=\"M18 12h3\"/><path d=\"M5.6 5.6l2.1 2.1\"/><path d=\"M16.3 16.3l2.1 2.1\"/><path d=\"M18.4 5.6l-2.1 2.1\"/><path d=\"M7.7 16.3l-2.1 2.1\"/>",
+};
+
+function choiceIcon(markup) {
+  const holder = document.createElement("span");
+  holder.className = "choice-icon";
+  holder.setAttribute("aria-hidden", "true");
+  holder.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${markup}</svg>`;
+  return holder;
+}
+
+function labeledChip(button, label, markup) {
+  const text = document.createElement("span");
+  text.className = "choice-label";
+  text.textContent = label;
+  button.append(choiceIcon(markup), text);
 }
 
 function renderActivities() {
@@ -276,10 +335,14 @@ function renderActivities() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "choice-chip";
-    button.textContent = label;
+    if (label === "Fight (boxing gloves provided)" || label === "Try something neither of us has done") {
+      button.classList.add("choice-wide");
+    }
+    labeledChip(button, label, PLAN_ICONS[label]);
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => {
       selectedPlan = label;
+      selectedPlanJoke = joke;
       activityJoke.textContent = joke;
       pressChip(activityList, button);
       if (label === "Food") {
@@ -288,7 +351,7 @@ function renderActivities() {
         hideFoodCard();
         clearFoodPick();
       }
-      setActivity.disabled = label === "Food" && !selectedFood;
+      setActivity.disabled = label === "Food" && selectedFoods.size === 0;
     });
     activityList.append(button);
     if (label === "Food") button.after(foodCard);
@@ -301,9 +364,11 @@ function renderActivities() {
     button.textContent = food;
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => {
-      selectedFood = food;
-      pressChip(foodList, button);
-      setActivity.disabled = false;
+      const on = button.getAttribute("aria-pressed") === "true";
+      if (on) selectedFoods.delete(food);
+      else selectedFoods.add(food);
+      button.setAttribute("aria-pressed", String(!on));
+      setActivity.disabled = selectedFoods.size === 0;
     });
     foodList.append(button);
   });
@@ -312,37 +377,128 @@ function renderActivities() {
 otherPlans.addEventListener("click", () => {
   hideFoodCard();
   clearFoodPick();
+  activityList.querySelectorAll(".choice-chip").forEach((chip) => {
+    chip.setAttribute("aria-pressed", "false");
+  });
   setActivity.disabled = true;
 });
 
+function turnWeek(direction) {
+  const next = weekOffset + direction;
+  if (next < 0 || next > MAX_WEEK) return;
+  weekOffset = next;
+  if (reduceMotion.matches) {
+    renderWeek();
+    return;
+  }
+
+  const token = ++weekToken;
+  const outX = direction > 0 ? -12 : 12;
+  dayRow.style.transition = "transform 180ms ease-out, opacity 180ms ease-out";
+  dayRow.style.transform = `translateX(${outX}px)`;
+  dayRow.style.opacity = "0";
+
+  window.setTimeout(() => {
+    if (token !== weekToken) return;
+    renderWeek();
+    dayRow.style.transition = "none";
+    dayRow.style.transform = `translateX(${-outX}px)`;
+    dayRow.style.opacity = "0";
+    void dayRow.offsetWidth;
+    if (token !== weekToken) return;
+    dayRow.style.transition = "transform 180ms ease-out, opacity 180ms ease-out";
+    dayRow.style.transform = "translateX(0)";
+    dayRow.style.opacity = "1";
+  }, 180);
+}
+
 weekPrev.addEventListener("click", () => {
-  if (weekOffset === 0) return;
-  weekOffset -= 1;
-  renderWeek();
+  turnWeek(-1);
 });
 
 weekNext.addEventListener("click", () => {
-  if (weekOffset === MAX_WEEK) return;
-  weekOffset += 1;
-  renderWeek();
+  turnWeek(1);
 });
 
 shockNext.addEventListener("click", () => {
   shockScene.hidden = true;
-  planScene.hidden = false;
+  show(planScene);
 });
 
 lockPlan.addEventListener("click", () => {
   planScene.hidden = true;
-  activityScene.hidden = false;
+  show(activityScene);
 });
 
+function planMessage() {
+  const lines = [selectedDay, selectedTime, selectedPlan];
+  if (selectedPlan === "Food") lines.push(selectedFoodLabel());
+  return lines.join("\n");
+}
+
 setActivity.addEventListener("click", () => {
-  const plan = selectedPlan === "Food" ? selectedFood : selectedPlan;
-  yesHint.textContent = `${selectedDay}, ${selectedTime}. ${plan}.`;
+  const line = document.createElement("br");
+  yesTitle.replaceChildren(selectedDay, line, selectedTime);
+  yesPlan.textContent = selectedPlan;
+  yesFoods.replaceChildren();
+  if (selectedPlan === "Food") {
+    FOODS.filter((food) => selectedFoods.has(food)).forEach((food) => {
+      const item = document.createElement("li");
+      item.textContent = food;
+      yesFoods.append(item);
+    });
+    yesFoods.hidden = false;
+  } else {
+    yesFoods.hidden = true;
+  }
+  if (selectedPlan === "Food") {
+    yesHint.hidden = true;
+  } else {
+    yesHint.hidden = false;
+    yesHint.textContent = selectedPlanJoke || selectedTimeJoke;
+  }
+  copyPlan.textContent = "Copy plan";
   activityScene.hidden = true;
-  yesScene.hidden = false;
-  yesScene.classList.add("is-in");
+  show(yesScene);
+});
+
+function copyWithTextarea(text) {
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.position = "fixed";
+  area.style.left = "0";
+  area.style.top = "0";
+  area.style.opacity = "0";
+  document.body.append(area);
+  area.focus();
+  area.select();
+  area.setSelectionRange(0, text.length);
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  }
+  area.remove();
+  return ok;
+}
+
+copyPlan.addEventListener("click", () => {
+  const text = planMessage();
+  const copied = copyWithTextarea(text);
+  const mark = (ok) => {
+    if (ok) copyPlan.textContent = "Copied";
+  };
+  if (!navigator.clipboard || !window.isSecureContext) {
+    mark(copied);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    mark(true);
+  }).catch(() => {
+    mark(copied);
+  });
 });
 
 renderPlan();
@@ -418,9 +574,29 @@ function hopAway(home) {
     [x, Math.min(maxY, y + HOP)],
   ];
 
-  let best = options[0];
+  const yes = yesGrow.getBoundingClientRect();
+  let best = null;
   let bestDistance = -1;
+  let leastOverlap = Infinity;
+  let leastSpot = options[0];
+
   for (const [tx, ty] of options) {
+    const left = home.left + tx;
+    const top = home.top + ty;
+    const right = left + home.width;
+    const bottom = top + home.height;
+    const overlapX = Math.min(right, yes.right) - Math.max(left, yes.left);
+    const overlapY = Math.min(bottom, yes.bottom) - Math.max(top, yes.top);
+    const overlap = overlapX > 0 && overlapY > 0 ? overlapX * overlapY : 0;
+
+    if (overlap > 0) {
+      if (overlap < leastOverlap) {
+        leastOverlap = overlap;
+        leastSpot = [tx, ty];
+      }
+      continue;
+    }
+
     const distance = Math.hypot(pointer.x - (home.x + tx), pointer.y - (home.y + ty));
     if (distance > bestDistance) {
       bestDistance = distance;
@@ -428,7 +604,7 @@ function hopAway(home) {
     }
   }
 
-  return best;
+  return best || leastSpot;
 }
 
 function computeTarget() {

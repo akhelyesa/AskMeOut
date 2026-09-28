@@ -88,8 +88,8 @@
         <h1>What are we doing?</h1>
         <div class="choice-list" id="activity-list" role="group" aria-label="Plan"></div>
         <div class="food-card" id="food-card" hidden>
-          <p class="kicker">What are we eating?</p>
-          <p class="hint">You pick. I'll pretend I'm easy to please.</p>
+          <p class="kicker">What are we feeling?</p>
+          <p class="hint">Pick as many as you want. No judgment!</p>
           <div class="time-list" id="food-list" role="group" aria-label="Food"></div>
           <button class="other-plans" id="other-plans" type="button">Other plans</button>
         </div>
@@ -99,9 +99,12 @@
 
       <section class="scene scene-yes" id="yes-scene" hidden>
         <p class="emoji" aria-hidden="true">💞</p>
-        <p class="kicker">Okay. Wow.</p>
-        <h1>It's a date!</h1>
-        <p class="hint" id="yes-hint">See you soon.</p>
+        <p class="kicker">It's a date!</p>
+        <h1 id="yes-title"></h1>
+        <p class="hint" id="yes-plan"></p>
+        <ul class="yes-foods" id="yes-foods" hidden></ul>
+        <p class="hint" id="yes-hint"></p>
+        <button class="yes-btn" id="copy-plan" type="button">Copy plan</button>
       </section>
     </main>
     <script src="js/app.js" defer></script>
