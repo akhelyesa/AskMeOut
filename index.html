@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Will you go out with me?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito+Sans:opsz,wght@6..12,500;6..12,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <ul class="floaters" aria-hidden="true">
+      <li>♥</li>
+      <li>♥</li>
+      <li>♥</li>
+      <li>♥</li>
+      <li>♥</li>
+    </ul>
+
+    <main>
+      <section class="scene scene-ask" id="ask-scene">
+        <h1>Will you go out with me?</h1>
+        <img class="ask-art" src="assets/ask.png" alt="">
+        <div class="actions">
+          <span class="yes-grow">
+            <button class="yes-btn" type="button">Yes</button>
+          </span>
+          <span class="no-mover">
+            <button class="no-btn" type="button" disabled>No</button>
+          </span>
+        </div>
+      </section>
+
+      <section class="scene" id="shock-scene" hidden>
+        <div class="heart-bit">
+          <p class="kicker">My heart rn</p>
+          <p class="bpm" id="bpm">72</p>
+          <svg class="heart-chart" viewBox="0 0 320 96" overflow="visible" aria-hidden="true">
+            <line class="grid" x1="0" y1="24" x2="320" y2="24" />
+            <line class="grid" x1="0" y1="48" x2="320" y2="48" />
+            <line class="grid" x1="0" y1="72" x2="320" y2="72" />
+            <polyline class="heart-line" points="
+              0,58 36,58
+              44,58 50,46 56,70 62,50 70,58
+              110,58
+              118,58 124,46 130,70 136,50 144,58
+              176,58
+              188,58 196,-28 204,118 214,8 226,108 240,-40 258,96 320,6
+            " />
+          </svg>
+        </div>
+        <div class="late-bit" hidden>
+          <img class="late-art" src="assets/happy.gif" alt="">
+          <h1>Too late.</h1>
+          <p class="hint">
+            I already told my mom<br>
+            Taking it back would be a whole conversation
+          </p>
+          <button class="yes-btn" id="shock-next" type="button">okay okay!</button>
+        </div>
+      </section>
+
+      <section class="scene scene-plan" id="plan-scene" hidden>
+        <h1>Pick a time.</h1>
+        <div class="week-picker">
+          <button class="week-nav" id="week-prev" type="button" aria-label="Previous week">‹</button>
+          <div class="week-card">
+            <div class="week-head" aria-hidden="true">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+            <div class="day-row" id="day-row" role="group" aria-label="Day"></div>
+          </div>
+          <button class="week-nav" id="week-next" type="button" aria-label="Next week">›</button>
+        </div>
+        <div class="time-list" id="time-list" role="group" aria-label="Time"></div>
+        <p class="hint time-joke" id="time-joke"></p>
+        <button class="yes-btn" id="lock-plan" type="button" disabled>Lock it in</button>
+      </section>
+
+      <section class="scene scene-yes" id="yes-scene" hidden>
+        <p class="emoji" aria-hidden="true">💞</p>
+        <p class="kicker">Okay. Wow.</p>
+        <h1>It's a date!</h1>
+        <p class="hint" id="yes-hint">See you soon.</p>
+      </section>
+    </main>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
