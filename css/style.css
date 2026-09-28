@@ -126,7 +126,8 @@ button:focus-visible {
     box-shadow: none;
   }
 
-  .day-chip:hover {
+  .day-chip:hover,
+  .other-plans:hover {
     transform: none;
   }
 }
@@ -291,11 +292,70 @@ button:active {
   background: #ffe4ec;
 }
 
+.choice-list {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.choice-chip {
+  width: 100%;
+  border: 2px solid #f3c3d1;
+  border-radius: 1rem;
+  color: #e23b6a;
+  background: #fff;
+  box-shadow: none;
+}
+
+.choice-chip[aria-pressed="true"] {
+  border-color: #e23b6a;
+  background: #ffe4ec;
+}
+
+.choice-chip[hidden] {
+  display: none;
+}
+
+.food-card {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 2px solid #f3c3d1;
+  border-radius: 1rem;
+  background: #fff;
+  opacity: 1;
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.food-card .time-list {
+  justify-self: stretch;
+}
+
+#food-card[hidden],
+#activity-joke[hidden] {
+  display: none;
+}
+
+.other-plans {
+  min-width: 0;
+  min-height: 0;
+  padding: 0.15rem 0.4rem;
+  border: none;
+  border-radius: 0;
+  color: #8a5c6c;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1rem;
+}
+
 .time-joke {
   min-height: 1.4em;
 }
 
-#lock-plan:disabled {
+#lock-plan:disabled,
+#set-activity:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   box-shadow: none;
@@ -409,6 +469,7 @@ button:active {
   button,
   .yes-grow,
   .heart-line,
+  .food-card,
   #yes-scene.is-in h1 {
     animation: none;
     transition: none;

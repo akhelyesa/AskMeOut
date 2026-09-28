@@ -1,6 +1,7 @@
 const askScene = document.querySelector("#ask-scene");
 const shockScene = document.querySelector("#shock-scene");
 const planScene = document.querySelector("#plan-scene");
+const activityScene = document.querySelector("#activity-scene");
 const yesScene = document.querySelector("#yes-scene");
 const yesBtn = document.querySelector("#ask-scene .yes-btn");
 const shockNext = document.querySelector("#shock-next");
@@ -10,6 +11,12 @@ const timeJoke = document.querySelector("#time-joke");
 const weekPrev = document.querySelector("#week-prev");
 const weekNext = document.querySelector("#week-next");
 const lockPlan = document.querySelector("#lock-plan");
+const activityList = document.querySelector("#activity-list");
+const foodCard = document.querySelector("#food-card");
+const foodList = document.querySelector("#food-list");
+const otherPlans = document.querySelector("#other-plans");
+const activityJoke = document.querySelector("#activity-joke");
+const setActivity = document.querySelector("#set-activity");
 const yesHint = document.querySelector("#yes-hint");
 const heartBit = document.querySelector(".heart-bit");
 const lateBit = document.querySelector(".late-bit");
@@ -99,10 +106,34 @@ const TIMES = [
   ["10:00 PM", "I have become one with my bed"],
 ];
 
+const PLANS = [
+  ["Food", "You pick. I'll pretend I'm easy to please"],
+  ["Bowling", "Competitive until one of us gets humbled"],
+  ["Pottery or painting", "We make something questionable and call it art"],
+  ["Mini golf", "It's not competitive. Until it is"],
+  ["Walk in the park", "Fresh air and suspiciously good conversation"],
+  ["Fight (boxing gloves provided)", "A romantic evening, apparently"],
+  ["Escape room", "Let's find out how well we panic together"],
+  ["Try something neither of us has done", "Low expectations. High potential for a story"],
+];
+
+const FOODS = [
+  "Classic dinner",
+  "Italian",
+  "Japanese",
+  "Korean",
+  "Turkish",
+  "Mexican",
+  "Thai",
+  "Dessert date",
+];
+
 const MAX_WEEK = 4;
 
 let selectedDay = "";
 let selectedTime = "";
+let selectedPlan = "";
+let selectedFood = "";
 let weekOffset = 0;
 
 function atNoon(date) {
@@ -189,6 +220,101 @@ function renderPlan() {
   });
 }
 
+let foodCardTimer = 0;
+let foodCardToken = 0;
+
+function clearFoodPick() {
+  selectedFood = "";
+  foodList.querySelectorAll("button").forEach((chip) => {
+    chip.setAttribute("aria-pressed", "false");
+  });
+}
+
+function showFoodCard(foodButton) {
+  const token = ++foodCardToken;
+  window.clearTimeout(foodCardTimer);
+  activityList.querySelectorAll(".choice-chip").forEach((chip) => {
+    chip.hidden = chip !== foodButton;
+  });
+  activityJoke.hidden = true;
+  if (!foodCard.hidden && foodCard.style.opacity !== "0") return;
+  foodCard.style.opacity = "0";
+  foodCard.hidden = false;
+  if (reduceMotion.matches) {
+    foodCard.style.opacity = "1";
+    return;
+  }
+  requestAnimationFrame(() => {
+    if (token !== foodCardToken) return;
+    foodCard.style.opacity = "1";
+  });
+}
+
+function hideFoodCard() {
+  const token = ++foodCardToken;
+  window.clearTimeout(foodCardTimer);
+  activityList.querySelectorAll(".choice-chip").forEach((chip) => {
+    chip.hidden = false;
+  });
+  activityJoke.hidden = false;
+  if (foodCard.hidden) return;
+  if (reduceMotion.matches) {
+    foodCard.hidden = true;
+    foodCard.style.opacity = "";
+    return;
+  }
+  foodCard.style.opacity = "0";
+  foodCardTimer = window.setTimeout(() => {
+    if (token !== foodCardToken) return;
+    foodCard.hidden = true;
+    foodCard.style.opacity = "";
+  }, 200);
+}
+
+function renderActivities() {
+  PLANS.forEach(([label, joke]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice-chip";
+    button.textContent = label;
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => {
+      selectedPlan = label;
+      activityJoke.textContent = joke;
+      pressChip(activityList, button);
+      if (label === "Food") {
+        showFoodCard(button);
+      } else {
+        hideFoodCard();
+        clearFoodPick();
+      }
+      setActivity.disabled = label === "Food" && !selectedFood;
+    });
+    activityList.append(button);
+    if (label === "Food") button.after(foodCard);
+  });
+
+  FOODS.forEach((food) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "time-chip";
+    button.textContent = food;
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => {
+      selectedFood = food;
+      pressChip(foodList, button);
+      setActivity.disabled = false;
+    });
+    foodList.append(button);
+  });
+}
+
+otherPlans.addEventListener("click", () => {
+  hideFoodCard();
+  clearFoodPick();
+  setActivity.disabled = true;
+});
+
 weekPrev.addEventListener("click", () => {
   if (weekOffset === 0) return;
   weekOffset -= 1;
@@ -207,13 +333,20 @@ shockNext.addEventListener("click", () => {
 });
 
 lockPlan.addEventListener("click", () => {
-  yesHint.textContent = `${selectedDay}, ${selectedTime}.`;
   planScene.hidden = true;
+  activityScene.hidden = false;
+});
+
+setActivity.addEventListener("click", () => {
+  const plan = selectedPlan === "Food" ? selectedFood : selectedPlan;
+  yesHint.textContent = `${selectedDay}, ${selectedTime}. ${plan}.`;
+  activityScene.hidden = true;
   yesScene.hidden = false;
   yesScene.classList.add("is-in");
 });
 
 renderPlan();
+renderActivities();
 
 function homeCenter() {
   const rect = noBtn.getBoundingClientRect();

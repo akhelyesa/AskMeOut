@@ -34,7 +34,7 @@
 
       <section class="scene" id="shock-scene" hidden>
         <div class="heart-bit">
-          <p class="kicker">My heart rn</p>
+          <p class="kicker">My heart right now</p>
           <p class="bpm" id="bpm">72</p>
           <svg class="heart-chart" viewBox="0 0 320 96" overflow="visible" aria-hidden="true">
             <line class="grid" x1="0" y1="24" x2="320" y2="24" />
@@ -81,7 +81,20 @@
         </div>
         <div class="time-list" id="time-list" role="group" aria-label="Time"></div>
         <p class="hint time-joke" id="time-joke"></p>
-        <button class="yes-btn" id="lock-plan" type="button" disabled>Lock it in</button>
+        <button class="yes-btn" id="lock-plan" type="button" disabled>Set the date!</button>
+      </section>
+
+      <section class="scene scene-plan" id="activity-scene" hidden>
+        <h1>What are we doing?</h1>
+        <div class="choice-list" id="activity-list" role="group" aria-label="Plan"></div>
+        <div class="food-card" id="food-card" hidden>
+          <p class="kicker">What are we eating?</p>
+          <p class="hint">You pick. I'll pretend I'm easy to please.</p>
+          <div class="time-list" id="food-list" role="group" aria-label="Food"></div>
+          <button class="other-plans" id="other-plans" type="button">Other plans</button>
+        </div>
+        <p class="hint time-joke" id="activity-joke"></p>
+        <button class="yes-btn" id="set-activity" type="button" disabled>That's the plan</button>
       </section>
 
       <section class="scene scene-yes" id="yes-scene" hidden>
